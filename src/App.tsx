@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { version } from "../package.json";
 import type {
   GameExited, GameStatus, LaunchResult, Operation, OperationFinished,
   OperationProgress, ReleaseSummary, Settings,
@@ -267,7 +268,7 @@ export default function App() {
     <div className="app-shell">
       <header className="app-header">
         <div className="brand"><img src="/launcher.svg" width="38" height="38" alt="" /><div><strong>ARKNIGHTS <span>LAUNCHER</span></strong><small>LOCAL CLIENT / LINUX</small></div></div>
-        <div className="header-meta"><span className="tag">CN · ORIGINAL</span><span className="version">v0.1.0</span></div>
+        <div className="header-meta"><span className="tag">CN · ORIGINAL</span><span className="version">v{version}</span></div>
       </header>
 
       <main>

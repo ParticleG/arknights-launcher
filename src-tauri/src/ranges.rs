@@ -30,7 +30,7 @@ pub struct Metadata {
 
 pub fn client() -> Result<Client, String> {
     Client::builder()
-        .user_agent("arknights-launcher/0.1.0")
+        .user_agent(concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION")))
         .https_only(true)
         .connect_timeout(Duration::from_secs(20))
         .timeout(Duration::from_secs(120))

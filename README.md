@@ -39,6 +39,52 @@ The executable is normally written to
 `src-tauri/target/release/bundle/deb/`. Building the app does not install a game,
 create an account, or publish the project anywhere.
 
+## Arch Linux packaging and AUR publishing
+
+The [AUR workflow](.github/workflows/aur-publish.yml) builds an x86-64 Arch
+package on pushes to `main` and on pull requests. These runs upload a test
+package to Actions without publishing it. The package includes the launcher,
+desktop entry, icon, and license notices. `dwproton-bin` is optional because the
+app can use a separately installed Proton runtime. No game files, official
+Windows installer, or Proton binaries are bundled.
+
+A published stable GitHub Release tagged `vX.Y.Z` triggers AUR publishing.
+The workflow also checks every six hours (UTC, at minute 53) for the highest
+stable release not yet on the AUR. No release or no newer version means no
+scheduled build. Arknights game and official launcher updates do not change
+the version of this app.
+
+For a new release, keep `package.json`, `src-tauri/Cargo.toml`, and
+`src-tauri/tauri.conf.json` at the same version, and update `Cargo.lock` if the
+Rust package version changes. The workflow checks the tag against all three
+manifests. It resolves the tag to a commit, pins the source archive by commit
+and SHA-256, and generates `PKGBUILD` and `.SRCINFO`. Only the verified recipe
+and its desktop entry go to the AUR. The binary remains an Actions artifact;
+the workflow does not write back to GitHub.
+
+### First publication
+
+1. Push the workflow to `main` in `ParticleG/arknights-launcher` and enable
+   GitHub Actions.
+2. Register a dedicated SSH public key with the AUR account that can create or
+   maintain `arknights-launcher`. Store its private key as the GitHub Actions
+   repository secret `AUR_SSH_PRIVATE_KEY`.
+3. Publish the first stable GitHub Release from the intended commit, such as
+   tag `v0.1.0` for app version `0.1.0`. A tag alone is not a Release.
+
+To retry publication from `main`, run the workflow manually. Enable
+`force_publish` to re-push the same release; it cannot downgrade the AUR
+package. After publication, install with `paru -S arknights-launcher`.
+
+For a read-only release check outside CI, run
+`bash scripts/check-aur-release.sh` with `gh`, `curl`, and `jq` available. It
+prints the version eligible for publication, if any.
+
+The local packaging check built `0.1.0-1` with `makepkg`, passed its four Rust
+tests, and opened the packaged desktop UI in an isolated X11 session. The
+workflow passed `actionlint`. The hosted container and authenticated AUR push
+were not exercised locally.
+
 ## Use an existing installation
 
 The default paths reuse the Arknights installation already managed through the

@@ -1,0 +1,40 @@
+# Maintainer: ParticleG <particle_g@outlook.com>
+# SPDX-License-Identifier: MIT
+
+pkgname=arknights-launcher
+pkgver=@VERSION@
+pkgrel=1
+_commit=@COMMIT@
+pkgdesc='Unofficial native Linux launcher for original Arknights CN'
+arch=('x86_64')
+url='https://github.com/ParticleG/arknights-launcher'
+license=('MIT')
+depends=('gtk3' 'webkit2gtk-4.1' 'xdg-utils')
+makedepends=('bun' 'rust')
+optdepends=('dwproton-bin: run the Windows game with DWProton')
+# GCC LTO objects from ring cannot be linked by Rust's LLVM linker.
+options=('!debug' '!lto')
+source=(
+  "$pkgname-$_commit.tar.gz::$url/archive/$_commit.tar.gz"
+  "$pkgname.desktop"
+)
+sha256sums=('@ARCHIVE_SHA256@' '@DESKTOP_SHA256@')
+
+build() {
+  cd "$srcdir/$pkgname-$_commit"
+  bun install --frozen-lockfile
+  bun run tauri build --no-bundle -- --locked
+}
+
+check() {
+  cd "$srcdir/$pkgname-$_commit"
+  cargo test --locked --release --lib --manifest-path src-tauri/Cargo.toml
+}
+
+package() {
+  cd "$srcdir/$pkgname-$_commit"
+  install -Dm755 src-tauri/target/release/arknights-launcher "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 "$srcdir/$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+  install -Dm644 src-tauri/icons/icon.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/$pkgname.png"
+  install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE LICENSES/LLauncher-MIT.txt
+}
